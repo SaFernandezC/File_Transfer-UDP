@@ -1,0 +1,47 @@
+#!/usr/bin/python3
+from lib.server.Server import Server
+import argparse
+import logging
+from lib.utils import PORT_DEFAULT, HOST_DEFAULT, STORAGE_DEFAULT
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--verbose',
+                        help='increase output verbosity', action="store_true")
+    parser.add_argument('-q', '--quiet',
+                        help='decrease output verbosity', action="store_true")
+    parser.add_argument('-H', '--host', help='service IP address')
+    parser.add_argument('-p', '--port', help='service port')
+    parser.add_argument('-s', '--storage', help='storage dir path')
+
+    args = parser.parse_args()
+
+    if (args.quiet):
+        logging.basicConfig(format='[%(levelname)s]: %(message)s',
+                            level=logging.ERROR)
+    elif args.verbose:
+        logging.basicConfig(format='[%(levelname)s]: %(message)s',
+                            level=logging.DEBUG)
+    else:
+        logging.basicConfig(format='[%(levelname)s]: %(message)s',
+                            level=logging.INFO)
+
+    port = args.port if args.port else PORT_DEFAULT
+    host = args.host if args.host else HOST_DEFAULT
+
+    if not args.storage:
+        args.storage = STORAGE_DEFAULT
+
+    logging.debug(f"Storage setting: {args.storage}")
+
+    server = Server(port, host, args.storage)
+    server.start()
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except (Exception, OSError) as e:
+        logging.error("An error occurred in server:")
+        logging.error(str(e))

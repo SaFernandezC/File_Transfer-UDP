@@ -1,0 +1,47 @@
+#!/usr/bin/python3
+from lib.client.Client import Client
+import logging
+import argparse
+from lib.utils import HOST_DEFAULT, PORT_DEFAULT, FILENAME_CLIENT_UPLOAD
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--verbose',
+                        help='increase output verbosity', action="store_true")
+    parser.add_argument('-q', '--quiet',
+                        help='decrease output verbosity', action="store_true")
+    parser.add_argument('-H', '--host', help='server IP address')
+    parser.add_argument('-p', '--port', help='server port')
+    parser.add_argument('-s', '--src', help='source file path')
+    parser.add_argument('-n', '--name', help='file name')
+
+    args = parser.parse_args()
+
+    if (args.quiet):
+        logging.basicConfig(format='[%(levelname)s]: %(message)s',
+                            level=logging.ERROR)
+    elif args.verbose:
+        logging.basicConfig(format='[%(levelname)s]: %(message)s',
+                            level=logging.DEBUG)
+    else:
+        logging.basicConfig(format='[%(levelname)s]: %(message)s',
+                            level=logging.INFO)
+
+    dir_client = args.src if args.src else FILENAME_CLIENT_UPLOAD
+    name_server = args.name if args.name else dir_client.split('/')[-1]
+    host = args.host if args.host else HOST_DEFAULT
+    port = args.port if args.port else PORT_DEFAULT
+
+    client = Client(host, port)
+    client.upload(filename_of_client=dir_client,
+                  filename_in_server=name_server)
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except KeyboardInterrupt:
+        logging.error("SERVER exited by CTRL + C.")
+    except (OSError, Exception) as e:
+        logging.error(f"An error occurred in client download: {str(e)}")
